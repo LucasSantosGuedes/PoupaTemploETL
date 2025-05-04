@@ -11,7 +11,7 @@ import base64
 st.set_page_config(page_title="Analisador Avançado de Excel para ETL", layout="wide")
 
 # Título do App
-st.title("🔍 Analisador Avançado de Excel para ETL")
+st.title("Bem-vindo(a) ao Poupa Tempo ETL")
 st.markdown("""
 Este aplicativo analisa arquivos Excel usando pandas profiling e identifica problemas potenciais em processos de ETL,
 fornecendo sugestões de correção em código Groovy.
