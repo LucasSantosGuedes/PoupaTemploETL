@@ -10,14 +10,248 @@ import base64
 
 st.set_page_config(page_title="Analisador Avançado de Excel para ETL", layout="wide")
 
-# Título do App
-st.title("Bem-vindo(a) ao Poupa Tempo ETL")
+# CSS customizado com as cores especificadas
 st.markdown("""
-Este aplicativo analisa arquivos Excel usando pandas profiling e identifica problemas potenciais em processos de ETL,
-fornecendo sugestões de correção em código Groovy.
-""")
+<style>
+    /* Cores principais */
+    :root {
+        --cor-principal: #23476f;     /* Pantone 7693 C - Azul escuro */
+        --cor-destaque: #e00d23;      /* Pantone 2035 C - Vermelho */
+        --cor-secundaria: #a0a7b0;    /* Pantone 429 C - Cinza */
+        --cor-fundo: #f8f9fa;
+        --cor-texto: #2c3e50;
+    }
 
-# Funções de análise
+    /* Header principal */
+    .main-header {
+        background: linear-gradient(135deg, var(--cor-principal) 0%, #2a5282 100%);
+        padding: 2rem;
+        border-radius: 10px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .main-header h1 {
+        color: white !important;
+        font-size: 2.5rem !important;
+        font-weight: 700 !important;
+        margin-bottom: 0.5rem !important;
+        text-align: center;
+    }
+    
+    .main-header p {
+        color: #e2e8f0 !important;
+        font-size: 1.1rem !important;
+        text-align: center;
+        margin: 0 !important;
+    }
+
+    /* Sidebar styling */
+    .css-1d391kg {
+        background-color: var(--cor-fundo);
+    }
+    
+    /* Métricas */
+    [data-testid="metric-container"] {
+        background: white;
+        border: 2px solid var(--cor-secundaria);
+        padding: 1rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    [data-testid="metric-container"] [data-testid="metric-value"] {
+        color: var(--cor-principal) !important;
+        font-weight: 700 !important;
+    }
+    
+    [data-testid="metric-container"] [data-testid="metric-label"] {
+        color: var(--cor-texto) !important;
+    }
+
+    /* Botões */
+    .stButton button {
+        background: linear-gradient(135deg, var(--cor-principal) 0%, #2a5282 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 0.5rem 2rem !important;
+        font-weight: 600 !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stButton button:hover {
+        background: linear-gradient(135deg, #1e3a5f 0%, var(--cor-principal) 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(35, 71, 111, 0.3) !important;
+    }
+
+    /* Botão de download especial */
+    .stDownloadButton button {
+        background: linear-gradient(135deg, var(--cor-destaque) 0%, #c70920 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 0.5rem 2rem !important;
+        font-weight: 600 !important;
+    }
+    
+    .stDownloadButton button:hover {
+        background: linear-gradient(135deg, #c70920 0%, var(--cor-destaque) 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 4px 12px rgba(224, 13, 35, 0.3) !important;
+    }
+
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 8px;
+        background-color: var(--cor-fundo);
+        padding: 0.5rem;
+        border-radius: 10px;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        background-color: white;
+        border: 2px solid var(--cor-secundaria);
+        border-radius: 8px;
+        color: var(--cor-texto);
+        font-weight: 600;
+        padding: 0.5rem 1rem;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, var(--cor-principal) 0%, #2a5282 100%) !important;
+        color: white !important;
+        border-color: var(--cor-principal) !important;
+    }
+
+    /* Alertas e mensagens */
+    .stAlert > div {
+        border-radius: 8px;
+        border-left: 4px solid var(--cor-destaque);
+    }
+    
+    .stSuccess > div {
+        background-color: #d4edda;
+        border-left-color: #28a745;
+        color: #155724;
+    }
+    
+    .stError > div {
+        background-color: #f8d7da;
+        border-left-color: var(--cor-destaque);
+        color: #721c24;
+    }
+    
+    .stWarning > div {
+        background-color: #fff3cd;
+        border-left-color: #ffc107;
+        color: #856404;
+    }
+    
+    .stInfo > div {
+        background-color: #cce7ff;
+        border-left-color: var(--cor-principal);
+        color: #0c5aa6;
+    }
+
+    /* Expanders */
+    .streamlit-expanderHeader {
+        background-color: var(--cor-fundo) !important;
+        border: 2px solid var(--cor-secundaria) !important;
+        border-radius: 8px !important;
+        color: var(--cor-texto) !important;
+        font-weight: 600 !important;
+    }
+    
+    .streamlit-expanderContent {
+        border: 2px solid var(--cor-secundaria) !important;
+        border-top: none !important;
+        border-radius: 0 0 8px 8px !important;
+        background-color: white !important;
+    }
+
+    /* Dataframes */
+    .stDataFrame {
+        border: 2px solid var(--cor-secundaria);
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    /* File uploader */
+    .stFileUploader > div {
+        border: 2px dashed var(--cor-secundaria) !important;
+        border-radius: 8px !important;
+        background-color: var(--cor-fundo) !important;
+    }
+    
+    .stFileUploader label {
+        color: var(--cor-principal) !important;
+        font-weight: 600 !important;
+    }
+
+    /* Code blocks */
+    .stCodeBlock {
+        border: 2px solid var(--cor-secundaria);
+        border-radius: 8px;
+        background-color: #f8f9fa;
+    }
+
+    /* Checkbox */
+    .stCheckbox label {
+        color: var(--cor-texto) !important;
+        font-weight: 500 !important;
+    }
+
+    /* Subheaders */
+    h2, h3 {
+        color: var(--cor-principal) !important;
+        border-bottom: 2px solid var(--cor-secundaria);
+        padding-bottom: 0.5rem;
+    }
+
+    /* Status containers */
+    .status-container {
+        background: white;
+        border: 2px solid var(--cor-secundaria);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 1rem 0;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    }
+    
+    .problem-card {
+        background: linear-gradient(135deg, #fff5f5 0%, #fed7d7 100%);
+        border: 2px solid var(--cor-destaque);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+    }
+    
+    .solution-card {
+        background: linear-gradient(135deg, #f0f9ff 0%, #dbeafe 100%);
+        border: 2px solid var(--cor-principal);
+        border-radius: 8px;
+        padding: 1rem;
+        margin: 0.5rem 0;
+    }
+
+    /* Spinner customizado */
+    .stSpinner > div {
+        border-top-color: var(--cor-principal) !important;
+    }
+</style>
+""", unsafe_allow_html=True)
+
+# Header principal customizado
+st.markdown("""
+<div class="main-header">
+    <h1>🚀 Bem-vindo(a) ao Poupa Tempo ETL</h1>
+    <p>Análise avançada de arquivos Excel com sugestões específicas para Apache NiFi e código Groovy</p>
+</div>
+""", unsafe_allow_html=True)
+
+# Funções de análise (mantendo as originais)
 def verificar_valores_nulos(df: pd.DataFrame) -> Dict:
     """Identifica colunas com valores nulos/vazios"""
     resultado = {}
@@ -987,7 +1221,8 @@ session.transfer(flowFile, REL_SUCCESS)
     return sugestoes
 
 # Upload do arquivo
-uploaded_file = st.file_uploader("📁 Faça upload do arquivo Excel", type=['xlsx', 'xls'])
+st.markdown("### 📁 Upload do Arquivo")
+uploaded_file = st.file_uploader("Selecione um arquivo Excel para análise", type=['xlsx', 'xls'])
 
 if uploaded_file is not None:
     try:
@@ -998,33 +1233,39 @@ if uploaded_file is not None:
             # Fallback para outro engine caso dê erro
             df = pd.read_excel(uploaded_file)
         
-        # Informações básicas
-        st.header("📊 Informações Básicas")
+        # Informações básicas com layout customizado
+        st.markdown("### 📊 Informações Básicas do Arquivo")
         col1, col2, col3 = st.columns(3)
         with col1:
-            st.metric("Total de Registros", len(df))
+            st.metric("📋 Total de Registros", len(df))
         with col2:
-            st.metric("Total de Colunas", len(df.columns))
+            st.metric("📊 Total de Colunas", len(df.columns))
         with col3:
-            st.metric("Tamanho em Memória", f"{df.memory_usage(deep=True).sum() / 1024:.1f} KB")
+            st.metric("💾 Tamanho em Memória", f"{df.memory_usage(deep=True).sum() / 1024:.1f} KB")
         
         # Preview dos dados
-        st.subheader("Preview dos Dados")
-        st.dataframe(df.head(10))
+        st.markdown("### 👀 Preview dos Dados")
+        st.dataframe(df.head(10), use_container_width=True)
         
         # Tabs para diferentes análises
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["📊 Pandas Profiling", "🚨 Problemas ETL", "🔧 Apache NiFi", "💡 Código Groovy", "📋 Relatório"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs([
+            "📊 Pandas Profiling", 
+            "🚨 Problemas ETL", 
+            "🔧 Apache NiFi", 
+            "💡 Código Groovy", 
+            "📋 Relatório"
+        ])
         
         with tab1:
-            st.header("📊 Análise com Pandas Profiling")
+            st.markdown("### 📊 Análise com Pandas Profiling")
             
-            profile_minimal = st.checkbox("Modo Minimal (mais rápido)", value=True, key="profiling_minimal")
+            profile_minimal = st.checkbox("🚀 Modo Minimal (mais rápido)", value=True, key="profiling_minimal")
             profile_config = {
                 'minimal': profile_minimal,
                 'explorative': not profile_minimal
             }
             
-            if st.button("Gerar Relatório Profiling"):
+            if st.button("🔍 Gerar Relatório Profiling", key="generate_profiling"):
                 with st.spinner("Gerando relatório de profiling..."):
                     profile = ProfileReport(df, 
                                           title="Análise ETL - Pandas Profiling",
@@ -1039,10 +1280,11 @@ if uploaded_file is not None:
                     href = f'<a href="data:text/html;base64,{b64}" download="profiling_report.html">📥 Download Relatório Profiling</a>'
                     st.markdown(href, unsafe_allow_html=True)
                     
-                    # Mostrar algumas estatísticas
-                    st.subheader("Resumo do Profiling")
+                    # Mostrar algumas estatísticas em cards customizados
+                    st.markdown("### 📈 Resumo do Profiling")
                     
-                    # Variáveis
+                    # Container personalizado para estatísticas
+                    st.markdown('<div class="status-container">', unsafe_allow_html=True)
                     st.write(f"**Total de variáveis:** {len(df.columns)}")
                     st.write(f"**Observações:** {len(df)}")
                     
@@ -1058,9 +1300,10 @@ if uploaded_file is not None:
                         st.write("**Valores missing por coluna:**")
                         for col, count in missing[missing > 0].items():
                             st.write(f"- {col}: {count} ({count/len(df)*100:.1f}%)")
+                    st.markdown('</div>', unsafe_allow_html=True)
         
         with tab2:
-            st.header("🚨 Problemas Identificados para ETL")
+            st.markdown("### 🚨 Problemas Identificados para ETL")
             
             with st.spinner("Analisando problemas ETL..."):
                 # Executar todas as análises
@@ -1076,65 +1319,92 @@ if uploaded_file is not None:
             
             # Valores Nulos
             if analise["valores_nulos"]:
-                st.error("**Valores Nulos/Vazios Encontrados**")
+                st.markdown('<div class="problem-card">', unsafe_allow_html=True)
+                st.error("**🔴 Valores Nulos/Vazios Encontrados**")
                 for coluna, info in analise["valores_nulos"].items():
                     st.warning(f"Coluna '{coluna}': {info['total']} problemas ({info['percentual']}%)")
+                st.markdown('</div>', unsafe_allow_html=True)
             
             # Tipos Inconsistentes
             if analise["tipos_inconsistentes"]:
-                st.error("**Tipos de Dados Inconsistentes**")
+                st.markdown('<div class="problem-card">', unsafe_allow_html=True)
+                st.error("**🔴 Tipos de Dados Inconsistentes**")
                 for coluna, tipos in analise["tipos_inconsistentes"].items():
                     st.warning(f"Coluna '{coluna}': tipos encontrados - {', '.join(tipos)}")
+                st.markdown('</div>', unsafe_allow_html=True)
             
             # Duplicatas
             if analise["duplicatas"]["registros_duplicados"] > 0:
-                st.error(f"**{analise['duplicatas']['registros_duplicados']} Registros Duplicados ({analise['duplicatas']['percentual']}%)**")
+                st.markdown('<div class="problem-card">', unsafe_allow_html=True)
+                st.error(f"**🔴 {analise['duplicatas']['registros_duplicados']} Registros Duplicados ({analise['duplicatas']['percentual']}%)**")
+                st.markdown('</div>', unsafe_allow_html=True)
             
             # Caracteres Especiais
             if analise["caracteres_especiais"]:
-                st.error("**Caracteres Especiais Problemáticos**")
+                st.markdown('<div class="problem-card">', unsafe_allow_html=True)
+                st.error("**🔴 Caracteres Especiais Problemáticos**")
                 for coluna, info in analise["caracteres_especiais"].items():
                     st.warning(f"Coluna '{coluna}': {info['count']} valores com caracteres especiais")
                     st.text(f"Exemplos: {', '.join(info['exemplos'])}")
+                st.markdown('</div>', unsafe_allow_html=True)
             
             # Espaços Extras
             if analise["espacos_extras"]:
-                st.error("**Espaços em Branco Extras**")
+                st.markdown('<div class="problem-card">', unsafe_allow_html=True)
+                st.error("**🔴 Espaços em Branco Extras**")
                 for coluna, info in analise["espacos_extras"].items():
                     st.warning(f"Coluna '{coluna}': {info['espacos_inicio_fim']} com espaços extras, {info['espacos_multiplos']} com múltiplos espaços")
+                st.markdown('</div>', unsafe_allow_html=True)
             
             # Formatos de Data
             if analise["formatos_data"]:
-                st.error("**Formatos de Data Inconsistentes**")
+                st.markdown('<div class="problem-card">', unsafe_allow_html=True)
+                st.error("**🔴 Formatos de Data Inconsistentes**")
                 for coluna, formatos in analise["formatos_data"].items():
                     st.warning(f"Coluna '{coluna}': múltiplos formatos encontrados")
                     for formato, count in formatos.items():
                         st.text(f"  - {formato}: {count} ocorrências")
+                st.markdown('</div>', unsafe_allow_html=True)
             
             # Nomes de Colunas
             if analise["nomes_colunas_problematicos"]:
-                st.error("**Nomes de Colunas Problemáticos**")
+                st.markdown('<div class="problem-card">', unsafe_allow_html=True)
+                st.error("**🔴 Nomes de Colunas Problemáticos**")
                 for problema in analise["nomes_colunas_problematicos"]:
                     st.warning(f"Coluna '{problema['coluna']}': {', '.join(problema['problemas'])}")
+                st.markdown('</div>', unsafe_allow_html=True)
+            
+            # Se não há problemas
+            if not any([
+                analise["valores_nulos"],
+                analise["tipos_inconsistentes"],
+                analise["duplicatas"]["registros_duplicados"] > 0,
+                analise["caracteres_especiais"],
+                analise["espacos_extras"],
+                analise["formatos_data"],
+                analise["nomes_colunas_problematicos"]
+            ]):
+                st.success("🎉 **Excelente!** Nenhum problema significativo foi encontrado no arquivo.")
         
         with tab3:
-            st.header("🔧 Soluções com Apache NiFi")
+            st.markdown("### 🔧 Soluções com Apache NiFi")
             
             # Gerar sugestões
             sugestoes_nifi = gerar_sugestoes_nifi(analise)
             
             if len(sugestoes_nifi) == 0:
-                st.info("Nenhum problema foi identificado que necessite de correção no Apache NiFi. O arquivo parece estar em bom estado!")
+                st.success("✅ Nenhum problema foi identificado que necessite de correção no Apache NiFi. O arquivo parece estar em bom estado!")
             else:
                 st.markdown("""
-                ### Como implementar no Apache NiFi
-                
-                Esta seção mostra os processadores específicos do Apache NiFi e suas configurações
-                para resolver os problemas identificados no seu arquivo.
-                """)
+                <div class="solution-card">
+                    <h4>🎯 Como implementar no Apache NiFi</h4>
+                    <p>Esta seção mostra os processadores específicos do Apache NiFi e suas configurações
+                    para resolver os problemas identificados no seu arquivo.</p>
+                </div>
+                """, unsafe_allow_html=True)
             
             for key, sugestao in sugestoes_nifi.items():
-                st.subheader(f"📝 {sugestao['problema']}")
+                st.markdown(f"### 📝 {sugestao['problema']}")
                 
                 st.markdown("**🔧 Processadores Recomendados:**")
                 
@@ -1152,36 +1422,37 @@ if uploaded_file is not None:
                 st.divider()
         
         with tab4:
-            st.header("💡 Código Groovy para ETL")
+            st.markdown("### 💡 Código Groovy para ETL")
             
             # Gerar sugestões
             sugestoes_groovy = gerar_sugestoes_groovy(analise)
             
             if len(sugestoes_groovy) == 0:
-                st.info("Nenhum problema foi identificado que necessite de correção com código Groovy. O arquivo parece estar em bom estado!")
+                st.success("✅ Nenhum problema foi identificado que necessite de correção com código Groovy. O arquivo parece estar em bom estado!")
             else:
                 st.markdown("""
-                ### Exemplos de código Groovy para NiFi
-                
-                Estes códigos Groovy podem ser usados no processador ExecuteScript do Apache NiFi
-                para corrigir os problemas identificados.
-                """)
+                <div class="solution-card">
+                    <h4>⚡ Exemplos de código Groovy para NiFi</h4>
+                    <p>Estes códigos Groovy podem ser usados no processador ExecuteScript do Apache NiFi
+                    para corrigir os problemas identificados.</p>
+                </div>
+                """, unsafe_allow_html=True)
             
             for key, sugestao in sugestoes_groovy.items():
-                st.subheader(sugestao["problema"])
-                st.markdown("**Sugestões:**")
+                st.markdown(f"### 🔍 {sugestao['problema']}")
+                st.markdown("**💡 Sugestões:**")
                 for s in sugestao["sugestoes"]:
                     st.markdown(f"- {s}")
                 
-                st.markdown("**Código Groovy de Exemplo:**")
+                st.markdown("**📜 Código Groovy de Exemplo:**")
                 st.code(sugestao["codigo_exemplo"], language="groovy")
                 st.divider()
         
         with tab5:
-            st.header("📋 Relatório Completo de Análise ETL")
+            st.markdown("### 📋 Relatório Completo de Análise ETL")
             
             # Resumo executivo
-            st.subheader("Resumo Executivo")
+            st.markdown("#### 📊 Resumo Executivo")
             total_problemas = sum([
                 len(analise["valores_nulos"]),
                 len(analise["tipos_inconsistentes"]),
@@ -1192,14 +1463,19 @@ if uploaded_file is not None:
                 len(analise["nomes_colunas_problematicos"])
             ])
             
-            st.markdown(f"""
-            - **Total de problemas identificados:** {total_problemas}
-            - **Colunas afetadas:** {len(set([col for d in analise.values() if isinstance(d, dict) for col in d.keys() if col not in ['registros_duplicados', 'percentual', 'por_coluna']]))}
-            - **Prioridade de correção:** {'Alta' if total_problemas > 10 else 'Média' if total_problemas > 5 else 'Baixa'}
-            """)
+            # Métricas do resumo
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                st.metric("🚨 Total de Problemas", total_problemas)
+            with col2:
+                colunas_afetadas = len(set([col for d in analise.values() if isinstance(d, dict) for col in d.keys() if col not in ['registros_duplicados', 'percentual', 'por_coluna']]))
+                st.metric("📊 Colunas Afetadas", colunas_afetadas)
+            with col3:
+                prioridade = 'Alta' if total_problemas > 10 else 'Média' if total_problemas > 5 else 'Baixa'
+                st.metric("⚡ Prioridade", prioridade)
             
             # Detalhamento dos problemas
-            st.subheader("Detalhamento dos Problemas")
+            st.markdown("#### 🔍 Detalhamento dos Problemas")
             
             # Criar dataframe com todos os problemas
             problemas_df = []
@@ -1234,7 +1510,7 @@ if uploaded_file is not None:
             
             if problemas_df:
                 df_problemas = pd.DataFrame(problemas_df)
-                st.dataframe(df_problemas)
+                st.dataframe(df_problemas, use_container_width=True)
                 
                 # Download do relatório
                 buffer = io.BytesIO()
@@ -1243,7 +1519,7 @@ if uploaded_file is not None:
                     
                     # Adicionar sheet com sugestões NiFi
                     sugestoes_nifi_df = []
-                    for key, sugestao in sugestoes_nifi.items():
+                    for key, sugestao in gerar_sugestoes_nifi(analise).items():
                         for processador in sugestao["processadores"]:
                             sugestoes_nifi_df.append({
                                 "Problema": sugestao["problema"],
@@ -1256,7 +1532,7 @@ if uploaded_file is not None:
                     
                     # Adicionar sheet com sugestões Groovy
                     sugestoes_groovy_df = []
-                    for key, sugestao in sugestoes_groovy.items():
+                    for key, sugestao in gerar_sugestoes_groovy(analise).items():
                         for s in sugestao["sugestoes"]:
                             sugestoes_groovy_df.append({
                                 "Problema": sugestao["problema"],
@@ -1274,39 +1550,64 @@ if uploaded_file is not None:
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
             else:
-                st.success("Nenhum problema significativo encontrado! O arquivo está pronto para ETL.")
+                st.success("🎉 Nenhum problema significativo encontrado! O arquivo está pronto para ETL.")
     
     except Exception as e:
-        st.error(f"Erro ao processar o arquivo: {str(e)}")
-        st.info("Verifique se o arquivo é um Excel válido e tente novamente.")
+        st.error(f"❌ Erro ao processar o arquivo: {str(e)}")
+        st.info("💡 Verifique se o arquivo é um Excel válido e tente novamente.")
 
 # Instruções de uso
 with st.expander("📖 Como usar este aplicativo"):
     st.markdown("""
-    1. **Faça upload de um arquivo Excel** (.xlsx ou .xls)
-    2. **Explore as análises em diferentes abas**:
-       - **Pandas Profiling**: Análise estatística completa
-       - **Problemas ETL**: Identificação de problemas específicos
-       - **Apache NiFi**: Processadores e configurações do NiFi
-       - **Código Groovy**: Scripts Groovy para ExecuteScript do NiFi
-       - **Relatório**: Relatório completo exportável
-    3. **Para Apache NiFi**:
-       - Veja os processadores recomendados
-       - Copie as configurações sugeridas
-       - Siga o fluxo exemplo para implementar
-    4. **Código Groovy pronto para NiFi**:
-       - Use os códigos diretamente no ExecuteScript
-       - Adapte os exemplos conforme necessário
-    
-    ### Benefícios:
-    - ✅ Análise estatística avançada com pandas profiling
-    - ✅ Sugestões específicas para Apache NiFi
-    - ✅ Processadores e configurações prontas
-    - ✅ Código Groovy específico para ExecuteScript do NiFi
-    - ✅ Fluxos de exemplo detalhados
-    - ✅ Relatórios exportáveis em múltiplos formatos
-    """)
+    <div class="solution-card">
+        <h4>🎯 Guia de Uso</h4>
+        <ol>
+            <li><strong>📁 Faça upload de um arquivo Excel</strong> (.xlsx ou .xls)</li>
+            <li><strong>🔍 Explore as análises em diferentes abas</strong>:
+                <ul>
+                    <li><strong>📊 Pandas Profiling</strong>: Análise estatística completa</li>
+                    <li><strong>🚨 Problemas ETL</strong>: Identificação de problemas específicos</li>
+                    <li><strong>🔧 Apache NiFi</strong>: Processadores e configurações do NiFi</li>
+                    <li><strong>💡 Código Groovy</strong>: Scripts Groovy para ExecuteScript do NiFi</li>
+                    <li><strong>📋 Relatório</strong>: Relatório completo exportável</li>
+                </ul>
+            </li>
+            <li><strong>🎛️ Para Apache NiFi</strong>:
+                <ul>
+                    <li>Veja os processadores recomendados</li>
+                    <li>Copie as configurações sugeridas</li>
+                    <li>Siga o fluxo exemplo para implementar</li>
+                </ul>
+            </li>
+            <li><strong>⚡ Código Groovy pronto para NiFi</strong>:
+                <ul>
+                    <li>Use os códigos diretamente no ExecuteScript</li>
+                    <li>Adapte os exemplos conforme necessário</li>
+                </ul>
+            </li>
+        </ol>
+        
+        <h4>🌟 Benefícios</h4>
+        <ul>
+            <li>✅ Análise estatística avançada com pandas profiling</li>
+            <li>✅ Sugestões específicas para Apache NiFi</li>
+            <li>✅ Processadores e configurações prontas</li>
+            <li>✅ Código Groovy específico para ExecuteScript do NiFi</li>
+            <li>✅ Fluxos de exemplo detalhados</li>
+            <li>✅ Relatórios exportáveis em múltiplos formatos</li>
+        </ul>
+    </div>
+    """, unsafe_allow_html=True)
 
-# Rodapé
+# Rodapé personalizado
 st.markdown("---")
-st.markdown("Desenvolvido para otimizar processos de ETL com foco em Apache NiFi")
+st.markdown("""
+<div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #23476f 0%, #2a5282 100%); border-radius: 10px; margin-top: 2rem;">
+    <p style="color: white; font-weight: 600; font-size: 1.1rem; margin: 0;">
+        🚀 Desenvolvido para otimizar processos de ETL com foco em Apache NiFi
+    </p>
+    <p style="color: #e2e8f0; margin: 0.5rem 0 0 0;">
+        Powered by Streamlit • Pandas • Apache NiFi
+    </p>
+</div>
+""", unsafe_allow_html=True)
